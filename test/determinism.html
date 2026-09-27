@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>box2d.js determinism</title>
+<style>
+	body { font: 14px/1.5 ui-monospace, Menlo, Consolas, monospace; margin: 16px; background: #fff; color: #111; }
+	.pass { color: #0a7a2f; }
+	.fail { color: #b3261e; }
+</style>
+</head>
+<body>
+<p>Box2D's falling-hinges determinism scene, run by the inlined single-threaded build. Serve the
+repository root over HTTP (for example <code>npx serve .</code>) and open
+<code>/test/determinism.html</code>; compare the hashes across browsers and machines.</p>
+<pre id="out">running…</pre>
+<script type="module">
+import Box2D from '../dist/box2d.inline.mjs';
+import { EXPECTED_HASH, EXPECTED_SLEEP_STEP, formatHash, runDeterminism } from './determinism.mjs';
+
+const out = document.getElementById( 'out' );
+try
+{
+	const b2 = await Box2D();
+	const r = runDeterminism( b2 );
+	const pass = r.hash === EXPECTED_HASH && r.sleepStep === EXPECTED_SLEEP_STEP;
+	out.className = pass ? 'pass' : 'fail';
+	out.textContent = [
+		`sleepStep  ${r.sleepStep} (Box2D expects ${EXPECTED_SLEEP_STEP})`,
+		`hash       ${formatHash( r.hash )} (Box2D expects ${formatHash( EXPECTED_HASH )})`,
+		`stateHash  ${formatHash( r.stateHash, 16 )}`,
+		pass ? 'PASS' : 'FAIL',
+		navigator.userAgent,
+	].join( '\n' );
+	document.title = pass ? 'PASS' : 'FAIL';
+}
+catch ( err )
+{
+	out.className = 'fail';
+	out.textContent = 'FAIL\n' + ( err && err.stack || err );
+	document.title = 'FAIL';
+}
+</script>
+</body>
+</html>

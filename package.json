@@ -1,0 +1,42 @@
+{
+  "name": "box2d.js",
+  "version": "0.1.0",
+  "description": "WebAssembly bindings for Box2D v3, Erin Catto's 2D physics engine",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/box2d.d.ts",
+      "import": "./dist/box2d.mjs"
+    },
+    "./inline": {
+      "types": "./dist/box2d.d.ts",
+      "import": "./dist/box2d.inline.mjs"
+    },
+    "./mt": {
+      "types": "./dist/box2d.d.ts",
+      "import": "./dist/box2d.mt.mjs"
+    },
+    "./mt-inline": {
+      "types": "./dist/box2d.d.ts",
+      "import": "./dist/box2d.mt.inline.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:debug": "node scripts/build.mjs --debug",
+    "test": "node test/smoke.mjs && tsc -p test/tsconfig.json"
+  },
+  "keywords": [
+    "box2d",
+    "physics",
+    "2d",
+    "wasm",
+    "emscripten",
+    "embind"
+  ],
+  "author": "Bill McKessy",
+  "license": "MIT"
+}
