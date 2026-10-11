@@ -330,6 +330,14 @@ inline val toU8( const uint8_t* data, int size )
 {
 	return val::global( "Uint8Array" ).new_( typed_memory_view( (size_t)( size > 0 ? size : 0 ), data ) );
 }
+// A snapshot image (a Uint8Array, or any array of byte values) copied into wasm memory in one block by
+// the typed array's own `set`, rather than read one element at a time.
+inline std::vector<uint8_t> bytesOf( val image )
+{
+	std::vector<uint8_t> bytes( image[ "length" ].as<size_t>() );
+	val( typed_memory_view( bytes.size(), bytes.data() ) ).call<void>( "set", image );
+	return bytes;
+}
 inline val toI32( const std::vector<int32_t>& v )
 {
 	return val::global( "Int32Array" ).new_( typed_memory_view( v.size(), v.data() ) );
@@ -2737,12 +2745,12 @@ EMSCRIPTEN_BINDINGS( box2d )
 	} );
 	ret_function( "b2World_Restore(worldId, image: ArrayLike<number>): boolean", +[]( b2WorldId worldId, val image )
 	{
-		std::vector<uint8_t> bytes = convertJSArrayToNumberVector<uint8_t>( image );
+		std::vector<uint8_t> bytes = bytesOf( image );
 		return b2World_Restore( worldId, bytes.data(), (int)bytes.size() );
 	} );
 	ret_function( "b2CreateWorldFromSnapshot(image: ArrayLike<number>, workerCount): b2WorldId", +[]( val image, int workerCount )
 	{
-		std::vector<uint8_t> bytes = convertJSArrayToNumberVector<uint8_t>( image );
+		std::vector<uint8_t> bytes = bytesOf( image );
 		b2WorldId worldId = b2CreateWorldFromSnapshot( bytes.data(), (int)bytes.size(), workerCount );
 		if ( B2_IS_NON_NULL( worldId ) ) clearCallbacks( worldId.index1 - 1 );
 		return worldId;
